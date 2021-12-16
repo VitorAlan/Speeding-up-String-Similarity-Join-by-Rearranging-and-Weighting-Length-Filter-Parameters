@@ -20,12 +20,13 @@ def algorithm1(D):
 #D is the inpute dataset, threshold is the lower bound threhsold for similarity functions
 #sim is the desired similarity function, and beta is the factor that influences in the length filter
 #the patterns functions formulas employ beta = 1
+#q is the Q value employed by the filters associated with the executions
 def algorithm2(D,threshold,sim, beta, extra_filter,q):
     size_indexes,sorted_words,a = algorithm1(D)
     similar_pairs = []
     #simfunc = {1:"Cosine",2:"Dice",3:"Jaccard",4:"Jaro",5:"Normalized Levenshtein"}
-    ftau = [1/(threshold**2),2-threshold,1/threshold,1/abs((3*threshold)-2),1/threshold]
-    #filters = {1:"Strings shares the q first characters", 2:"Strings has more than 50% of similarity in the first q-gram"}
+    ftau = [1/(thresahold**2),(2-threshold)/threshold,1/threshold,1/abs((3*threshold)-2),1/threshold]
+    #filters = {0:"Exeution only with the length filter", 1:"Strings shares the q first characters", 2:"Strings has more than 50% of similarity in the first q-gram"}
     lf = abs(1-ftau[sim-1])
     match sim:
         case 1:
@@ -40,7 +41,18 @@ def algorithm2(D,threshold,sim, beta, extra_filter,q):
             return Levenshtein(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q)
 
 #Cosine similarity function
-def Cosine(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):    
+def Cosine(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):   
+    if(extra_filter == 0):
+        similar_pairs = []
+        for i in range(len(sorted_words)):
+            limit = math.floor(len(sorted_words[i])+(len(sorted_words[i])*lf*beta))
+            if(limit>a):
+                limit = a
+            for j in range(i+1,size_indexes[limit+1]):
+                similarity = textdistance.cosine(sorted_words[i],sorted_words[j])
+                if(similarity>=threshold):
+                    similar_pairs.append((sorted_words[i],sorted_words[j]))
+        return similar_pairs
     if(extra_filter == 1):
         similar_pairs = []
         for i in range(len(sorted_words)):
@@ -68,6 +80,18 @@ def Cosine(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):
 
 #Sorensen-Dice Coeficcient                                   
 def Dice(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):
+    if(extra_filter == 0):
+        similar_pairs = []
+        for i in range(len(sorted_words)):
+            Na = len(sorted_words[i])
+            limit = math.floor(Na+(Na*lf*beta))
+            if(limit>a):
+                limit = a
+            for j in range(i+1,size_indexes[limit+1]):
+                similarity = textdistance.sorensen(sorted_words[i],sorted_words[j])
+                if(similarity>=threshold):
+                    similar_pairs.append((sorted_words[i],sorted_words[j]))
+        return similar_pairs
     if(extra_filter == 1):
         similar_pairs = []
         for i in range(len(sorted_words)):
@@ -94,8 +118,21 @@ def Dice(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):
                     if(similarity>=threshold):
                         similar_pairs.append((sorted_words[i],sorted_words[j]))
         return similar_pairs
-    
+
+#Jaccard similarity function 
 def Jaccard(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):
+    if(extra_filter == 0):
+        similar_pairs = []
+        for i in range(len(sorted_words)):
+            limit = math.floor(len(sorted_words[i])+(len(sorted_words[i])*lf*beta))
+            if(limit>a):
+                limit = a
+            for j in range(i+1,size_indexes[limit+1]):
+                similarity = textdistance.jaccard(sorted_words[i],sorted_words[j])
+                if(similarity>=threshold):
+                    similar_pairs.append((sorted_words[i],sorted_words[j]))
+        return similar_pairs
+    
     if(extra_filter == 1):
         similar_pairs = []
         for i in range(len(sorted_words)):
@@ -120,8 +157,20 @@ def Jaccard(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):
                     if(similarity>=threshold):
                         similar_pairs.append((sorted_words[i],sorted_words[j]))
         return similar_pairs
-    
+
+#Jaro similarity function
 def Jaro(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):
+    if(extra_filter == 0):
+        similar_pairs = []
+        for i in range(len(sorted_words)):
+            limit = math.floor(len(sorted_words[i])+abs(len(sorted_words[i])*lf*beta))
+            if(limit>a):
+                limit = a
+            for j in range(i+1,size_indexes[limit+1]):
+                similarity = textdistance.jaro(sorted_words[i],sorted_words[j])
+                if(similarity>=threshold):
+                    similar_pairs.append((sorted_words[i],sorted_words[j]))
+        return similar_pairs
     if(extra_filter == 1):
         similar_pairs = []
         for i in range(len(sorted_words)):
@@ -146,8 +195,21 @@ def Jaro(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):
                     if(similarity>=threshold):
                         similar_pairs.append((sorted_words[i],sorted_words[j]))
         return similar_pairs
-    
+
+#Normalized Levenshtein Distance
 def Levenshtein(size_indexes,sorted_words,a,threshold,lf,beta,extra_filter,q):
+    if(extra_filter == 0):
+        similar_pairs = []
+        for i in range(len(sorted_words)):
+            limit = math.floor(len(sorted_words[i])+abs(len(sorted_words[i])*lf*beta))
+            if(limit>a):
+                limit = a
+            for j in range(i+1,size_indexes[limit+1]):
+                similarity = textdistance.levenshtein(sorted_words[i],sorted_words[j])
+                normalized_similarity = (len(sorted_words[j]) - similarity)/(len(sorted_words[j]))
+                if(normalized_similarity>=threshold):
+                    similar_pairs.append((sorted_words[i],sorted_words[j]))
+        return similar_pairs
     if(extra_filter == 1):
         similar_pairs = []
         for i in range(len(sorted_words)):
