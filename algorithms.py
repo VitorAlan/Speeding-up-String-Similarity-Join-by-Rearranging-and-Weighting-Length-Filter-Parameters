@@ -25,7 +25,7 @@ def algorithm2(D,threshold,sim, beta, extra_filter,q):
     size_indexes,sorted_words,a = algorithm1(D)
     similar_pairs = []
     #simfunc = {1:"Cosine",2:"Dice",3:"Jaccard",4:"Jaro",5:"Normalized Levenshtein"}
-    ftau = [1/(thresahold**2),(2-threshold)/threshold,1/threshold,1/abs((3*threshold)-2),1/threshold]
+    ftau = [1/(threshold**2),(2-threshold)/threshold,1/threshold,1/abs((3*threshold)-2),1/threshold]
     #filters = {0:"Exeution only with the length filter", 1:"Strings shares the q first characters", 2:"Strings has more than 50% of similarity in the first q-gram"}
     lf = abs(1-ftau[sim-1])
     match sim:
